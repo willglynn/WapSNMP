@@ -96,6 +96,12 @@ type SNMPVersion uint8
 // UnsupportedBerType will be used if data couldn't be decoded.
 type UnsupportedBerType []byte
 
+type NoSuchInstanceError []byte
+
+func (e NoSuchInstanceError) Error() string {
+	return fmt.Sprintf("no such instance. Received bytes: %v", []byte(e))
+}
+
 // List of the supported snmp versions.
 const (
 	SNMPv1  SNMPVersion = 0
@@ -336,7 +342,7 @@ func DecodeSequence(toparse []byte) ([]interface{}, error) {
 			}
 			result = append(result, pdu)
 		case NoSuchInstance:
-			return nil, fmt.Errorf("no such instance. Received bytes: %v", toparse)
+			return nil, NoSuchInstanceError(toparse)
 		case EndOfMibView:
 			result = append(result, EndOfMibView)
 		default:
